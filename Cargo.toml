@@ -1,5 +1,5 @@
 [package]
-name = "dev-score"
+name = "grpcdemo"
 version = "0.1.0"
 edition = "2021"
 

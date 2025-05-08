@@ -925,26 +925,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dev-score"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.21.7",
- "borsh 0.10.4",
- "borsh-derive 0.10.4",
- "dotenvy",
- "futures-util",
- "log",
- "pretty_env_logger",
- "solana-sdk",
- "tokio",
- "tokio-stream",
- "tonic 0.10.2",
- "yellowstone-grpc-client",
- "yellowstone-grpc-proto",
-]
-
-[[package]]
 name = "digest"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1291,6 +1271,26 @@ name = "gimli"
 version = "0.31.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07e28edb80900c19c28f1072f2e8aeca7fa06b23cd4169cefe1af5aa3260783f"
+
+[[package]]
+name = "grpcdemo"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.21.7",
+ "borsh 0.10.4",
+ "borsh-derive 0.10.4",
+ "dotenvy",
+ "futures-util",
+ "log",
+ "pretty_env_logger",
+ "solana-sdk",
+ "tokio",
+ "tokio-stream",
+ "tonic 0.10.2",
+ "yellowstone-grpc-client",
+ "yellowstone-grpc-proto",
+]
 
 [[package]]
 name = "h2"
