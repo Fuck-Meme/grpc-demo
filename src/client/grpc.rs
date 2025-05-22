@@ -6,21 +6,23 @@ use yellowstone_grpc_proto::geyser::{
     subscribe_update::UpdateOneof,
 };
 use tokio::sync::Mutex;
-use log::{error, info};
+use log::{error, debug};
+use bs58;
 
-use crate::{
-    models::{CreateEvent, CompleteEvent, TradeEvent, BuyEvent, CreatePoolEvent, SellEvent},
-    parser::events::EventTrait,
-};
+use crate::handle::EventHandler;
 
 #[derive(Clone)]
 pub struct GrpcClient {
     url: String,
+    event_handler: Arc<Mutex<EventHandler>>,
 }
 
 impl GrpcClient {
     pub fn new(url: String) -> Self {
-        Self { url }
+        Self { 
+            url,
+            event_handler: Arc::new(Mutex::new(EventHandler::new())),
+        }
     }
 
     pub async fn subscribe(&self, program_id: String) -> Result<(), Box<dyn Error>> {
@@ -62,10 +64,18 @@ impl GrpcClient {
                 Ok(msg) => {
                     match msg.update_oneof {
                         Some(UpdateOneof::Transaction(sut)) => {
-                            if let Some(meta) = sut.transaction.and_then(|t| t.meta) {
+                            if let Some(meta) = sut.transaction.clone().and_then(|t| t.meta) {
                                 let logs = meta.log_messages;
                                 if !logs.is_empty() {
-                                    self.handle_logs(&logs).await?;
+                                    let slot = sut.slot;
+                                    let signature = sut.transaction
+                                        .and_then(|t| t.transaction)
+                                        .and_then(|t| t.signatures.first().cloned())
+                                        .map(|sig| bs58::encode(sig).into_string())
+                                        .unwrap_or_else(|| "unknown".to_string());
+                                    
+                                    let mut event_handler = self.event_handler.lock().await;
+                                    event_handler.handle_logs(&logs, slot, signature).await?;
                                 }
                             }
                         }
@@ -76,7 +86,7 @@ impl GrpcClient {
                                     ..Default::default()
                                 })
                                 .await;
-                            info!("Ping sent");
+                            debug!("Ping sent");
                         }
                         _ => {}
                     }
@@ -86,34 +96,6 @@ impl GrpcClient {
                     break;
                 }
             }
-        }
-        Ok(())
-    }
-
-    async fn handle_logs(&self, logs: &[String]) -> Result<(), Box<dyn Error>> {
-        //Pump创建代币
-        if let Some(create_event) = CreateEvent::parse_logs::<CreateEvent>(logs) {
-            info!("{:?}", create_event);
-        }
-        //Pump曲线完成
-        if let Some(complete_event) = CompleteEvent::parse_logs::<CompleteEvent>(logs) {
-            info!("{:?}", complete_event);
-        }
-        //Pump交易
-        if let Some(trade_event) = TradeEvent::parse_logs::<TradeEvent>(logs) {
-            info!("{:?}", trade_event);
-        }
-        //PumpAmm买入
-        if let Some(buy_event) = BuyEvent::parse_logs::<BuyEvent>(logs) {
-            info!("{:?}", buy_event);
-        }
-        //PumpAmm创建池
-        if let Some(create_pool_event) = CreatePoolEvent::parse_logs::<CreatePoolEvent>(logs) {
-            info!("{:?}", create_pool_event);
-        }
-        //PumpAmm卖出
-        if let Some(sell_event) = SellEvent::parse_logs::<SellEvent>(logs) {
-            info!("{:?}", sell_event);
         }
         Ok(())
     }

@@ -1,10 +1,11 @@
 mod client;
 mod models;
 mod parser;
+mod handle;
 
 use client::grpc::GrpcClient;
 use dotenvy::dotenv;
-use log::info;
+use log::{debug};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -16,8 +17,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let program_id2 = "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA".to_string();
 
     let client = GrpcClient::new(url);
-    info!("Starting subscription for Pump: {}", program_id1);
-    info!("Starting subscription for PumpAmm: {}", program_id2);
+    debug!("Starting subscription for Pump: {}", program_id1);
+    debug!("Starting subscription for PumpAmm: {}", program_id2);
     
     // 创建一个包含两个程序 ID 的向量
     let program_ids = vec![program_id1, program_id2];

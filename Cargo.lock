@@ -1280,6 +1280,7 @@ dependencies = [
  "base64 0.21.7",
  "borsh 0.10.4",
  "borsh-derive 0.10.4",
+ "bs58",
  "dotenvy",
  "futures-util",
  "log",
