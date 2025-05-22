@@ -67,15 +67,6 @@ if let Some(buy) = pump_amm_events.buy {
 - tokio
 - log
 
-## 配置
-
-在 `src/main.rs` 中配置要监控的合约地址：
-
-```rust
-const PUMP_PROGRAM_ID: &str = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
-const PUMP_AMM_PROGRAM_ID: &str = "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
-```
-
 ## 输出格式
 
 事件输出格式如下：
