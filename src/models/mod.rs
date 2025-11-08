@@ -15,6 +15,26 @@ pub struct CreateEvent {
     pub virtual_sol_reserves: u64,
     pub real_token_reserves: u64,
     pub token_total_supply: u64,
+    pub token_program: Pubkey,
+    pub is_mayhem_mode: bool,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize)]
+pub struct CreateV2Event {
+    pub name: String,
+    pub symbol: String,
+    pub uri: String,
+    pub mint: Pubkey,
+    pub bonding_curve: Pubkey,
+    pub user: Pubkey,
+    pub creator: Pubkey,
+    pub timestamp: i64,
+    pub virtual_token_reserves: u64,
+    pub virtual_sol_reserves: u64,
+    pub real_token_reserves: u64,
+    pub token_total_supply: u64,
+    pub token_program: Pubkey,
+    pub is_mayhem_mode: bool,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize)]
@@ -43,6 +63,12 @@ pub struct TradeEvent {
     pub creator: Pubkey,
     pub creator_fee_basis_points: u64,
     pub creator_fee: u64,
+    pub track_volume: bool,
+    pub total_unclaimed_tokens: u64,
+    pub total_claimed_tokens: u64,
+    pub current_sol_volume: u64,
+    pub last_update_timestamp: i64,
+    pub ix_name: String,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize)]
@@ -70,6 +96,13 @@ pub struct BuyEvent {
     pub coin_creator: Pubkey,
     pub coin_creator_fee_basis_points: u64,
     pub coin_creator_fee: u64,
+    pub track_volume: bool,
+    pub total_unclaimed_tokens: u64,
+    pub total_claimed_tokens: u64,
+    pub current_sol_volume: u64,
+    pub last_update_timestamp: i64,
+    pub min_base_amount_out: u64,
+    pub ix_name: String,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize)]
@@ -121,4 +154,5 @@ pub struct CreatePoolEvent {
     pub user_base_token_account: Pubkey,
     pub user_quote_token_account: Pubkey,
     pub coin_creator: Pubkey,
-} 
+    pub is_mayhem_mode: bool,
+}

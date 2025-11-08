@@ -1,20 +1,22 @@
 [package]
-name = "grpcdemo"
+name = "grpc"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1.0", features = ["full"] }
-anyhow = "1.0"
-borsh = "0.10.3"
-borsh-derive = "0.10.3"
-solana-sdk = "2.2.1"
-base64 = "0.21"
-dotenvy = "0.15"
-log = "0.4"
-pretty_env_logger = "0.5"
-yellowstone-grpc-client = { version = "6.0.0" }
-yellowstone-grpc-proto = { version = "6.0.0" }
-futures-util = "0.3"
-tokio-stream = "0.1"
-tonic = "0.10"
+tokio = { version = "1.48.0", features = ["macros", "rt-multi-thread", "signal"] }
+anyhow = "1.0.100"
+borsh = "1.5.7"
+borsh-derive = "1.5.7"
+solana-sdk = "3.0.0"
+base64 = "0.22.1"
+dotenvy = "0.15.7"
+log = "0.4.28"
+pretty_env_logger = "0.5.0"
+yellowstone-grpc-client = "10.1.1"
+yellowstone-grpc-proto = "10.1.1"
+futures-util = "0.3.31"
+tokio-stream = "0.1.17"
+tonic = "0.14.2"
+rustls = { version = "0.23.27", features = ["ring"] }
+

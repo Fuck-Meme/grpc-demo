@@ -1,36 +1,84 @@
-use std::error::Error;
-use base64::{Engine, engine::general_purpose};
+use crate::models::{
+    BuyEvent, CompleteEvent, CreateEvent, CreatePoolEvent, CreateV2Event, SellEvent, TradeEvent,
+};
+use base64::{engine::general_purpose, Engine};
 use borsh::BorshDeserialize;
-use crate::models::{CreateEvent, TradeEvent, CompleteEvent, BuyEvent, CreatePoolEvent, SellEvent};
+use std::{error::Error, ops::ControlFlow};
 
 const PROGRAM_DATA: &str = "Program data: ";
+
+pub fn visit_program_logs<F>(logs: &[String], mut visitor: F)
+where
+    F: FnMut(&[u8], &[u8]) -> ControlFlow<()>,
+{
+    let mut buffer = Vec::new();
+
+    for log in logs.iter().rev() {
+        let payload = match log.strip_prefix(PROGRAM_DATA) {
+            Some(p) => p,
+            None => continue,
+        };
+
+        buffer.clear();
+        if general_purpose::STANDARD
+            .decode_vec(payload, &mut buffer)
+            .is_err()
+        {
+            continue;
+        }
+
+        if buffer.len() < 8 {
+            continue;
+        }
+
+        let (discriminator, data) = buffer.split_at(8);
+
+        if visitor(discriminator, data).is_break() {
+            break;
+        }
+    }
+}
 
 pub trait EventTrait: Sized + std::fmt::Debug {
     fn discriminator() -> [u8; 8];
     fn from_bytes(bytes: &[u8]) -> Result<Self, Box<dyn Error>>;
     fn valid_discrminator(head: &[u8]) -> bool;
 
-    fn parse_logs<T: EventTrait + Clone>(logs: &[String]) -> Option<T> {
-        logs.iter().rev().find_map(|log| {
-            let payload = log.strip_prefix(PROGRAM_DATA)?;
-            let bytes = general_purpose::STANDARD
-                .decode(payload)
-                .map_err(|e| Box::new(e) as Box<dyn Error>)
-                .ok()?;
+    #[allow(dead_code)]
+    fn parse_logs<T: EventTrait>(logs: &[String]) -> Option<T> {
+        let mut result = None;
 
-            let (discr, rest) = bytes.split_at(8);
-            if Self::valid_discrminator(discr) {
-                T::from_bytes(rest).ok()
-            } else {
-                None
+        visit_program_logs(logs, |discriminator, data| {
+            if T::valid_discrminator(discriminator) {
+                if let Ok(event) = T::from_bytes(data) {
+                    result = Some(event);
+                    return ControlFlow::Break(());
+                }
             }
-        })
+            ControlFlow::Continue(())
+        });
+
+        result
     }
 }
 
 impl EventTrait for CreateEvent {
     fn discriminator() -> [u8; 8] {
         [27, 114, 169, 77, 222, 235, 99, 118]
+    }
+
+    fn from_bytes(bytes: &[u8]) -> Result<Self, Box<dyn Error>> {
+        Self::try_from_slice(bytes).map_err(|e| Box::new(e) as Box<dyn Error>)
+    }
+
+    fn valid_discrminator(discr: &[u8]) -> bool {
+        discr == Self::discriminator()
+    }
+}
+
+impl EventTrait for CreateV2Event {
+    fn discriminator() -> [u8; 8] {
+        [214, 144, 76, 236, 95, 139, 49, 180]
     }
 
     fn from_bytes(bytes: &[u8]) -> Result<Self, Box<dyn Error>> {
@@ -110,4 +158,4 @@ impl EventTrait for SellEvent {
     fn valid_discrminator(discr: &[u8]) -> bool {
         discr == Self::discriminator()
     }
-} 
+}
